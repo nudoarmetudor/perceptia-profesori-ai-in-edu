@@ -1,0 +1,131 @@
+/* ==========================================================================
+   STYLE.CSS - Optimizări Responsive și Adaptabilitate Mobil / Tabletă
+   Proiect: Percepția Profesorilor asupra AI în Educație (Republica Moldova)
+   Autor: Tudor Lapp, formator, CNIDE „Clasa Viitorului”
+   ========================================================================== */
+
+/* --- Scrollbar personalizat (mutat din index.html) --- */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* --- Corecții specifice pentru Mobil (ecrane < 768px) --- */
+@media (max-width: 767px) {
+    /* 1. Resetare structură principală pentru a curge vertical */
+    #app-content {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        height: auto !important;
+    }
+
+    aside {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        padding: 1rem !important;
+        flex-shrink: initial !important;
+    }
+
+    main {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    /* 2. Meniul de tab-uri - derulare orizontală fără rupere de rând */
+    nav {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        gap: 1rem !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Ascunde scrollbar pe Firefox */
+    }
+    
+    nav::-webkit-scrollbar {
+        display: none; /* Ascunde scrollbar pe Chrome/Safari */
+    }
+
+    .tab-btn {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* 3. Optimizare spațiu pentru grafice */
+    .relative.h-48, .relative.h-56, .relative.h-64, .relative.h-72 {
+        height: 240px !important; /* Înălțime fixă optimă pe mobil */
+    }
+
+    .grid-cols-2 {
+        grid-template-cols: 1fr !important; /* Stivuiește profilul demografic (Gen/Mediu) */
+    }
+
+    /* 4. Corecții la cardurile KPI (stivuire 2x2 în loc de linie lungă) */
+    .grid-cols-1.sm:grid-cols-2.lg:grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+    }
+
+    /* 5. Ajustări pentru Tab-ul 2 (Competențe & Detalii) */
+    #tab-skills {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    #tab-skills .grid-cols-1.lg:grid-cols-3 {
+        grid-template-columns: 1fr !important; /* Stivuiește lista de competențe și panoul de detalii */
+    }
+
+    #skills-list {
+        max-height: 350px !important; /* Limitează înălțimea listei pe mobil */
+    }
+
+    /* 6. Formularul de căutare calitativă (Tab-ul 4) */
+    #tab-text .flex-col.lg:flex-row {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+
+    #tab-text .w-full.lg:w-72 {
+        width: 100% !important;
+    }
+
+    #text-responses-container {
+        grid-template-columns: 1fr !important; /* O singură coloană pentru feedback-uri */
+        max-height: 400px !important;
+    }
+
+    /* 7. Modalul QR Pop-up */
+    #qr-modal .max-w-sm {
+        max-width: 90% !important;
+    }
+
+    #qr-modal img {
+        width: 100% !important;
+        height: auto !important;
+    }
+}
+
+/* --- Corecții specifice pentru Tablete (768px - 1024px) --- */
+@media (min-width: 768px) and (max-width: 1024px) {
+    aside {
+        width: 240px !important;
+    }
+    
+    .grid-cols-1.sm:grid-cols-2.lg:grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
