@@ -1,10 +1,10 @@
 /* ==========================================================================
-   STYLE.CSS - Optimizări Responsive și Adaptabilitate Mobil / Tabletă
+   STYLE.CSS - Soluție Avansată Mobile-First și Adaptabilitate Ultra-Responsive
    Proiect: Percepția Profesorilor asupra AI în Educație (Republica Moldova)
    Autor: Tudor Lapp, formator, CNIDE „Clasa Viitorului”
    ========================================================================== */
 
-/* --- Scrollbar personalizat (mutat din index.html) --- */
+/* --- Scrollbar personalizat premium --- */
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -20,21 +20,55 @@
     background: #94a3b8;
 }
 
-/* --- Corecții specifice pentru Mobil (ecrane < 768px) --- */
+/* ==========================================================================
+   REGULI DE SUPRASCRIERE PENTRU MOBIL (ecrane < 768px)
+   ========================================================================== */
 @media (max-width: 767px) {
-    /* 1. Resetare structură principală pentru a curge vertical */
+    
+    /* 1. OPTIMIZARE NAVBAR / HEADER (Nu mai ocupă jumătate de ecran) */
+    header {
+        padding: 0.75rem 1rem !important; /* Compactare padding header */
+        position: static !important;      /* Nu îl lăsăm fix dacă consumă ecran, se va derula natural */
+    }
+    
+    header p {
+        display: none !important; /* Ascundem subtitlul lung pentru a salva 80px de ecran */
+    }
+    
+    header h1 {
+        font-size: 1.25rem !important; /* Text titlu mult mai compact */
+        line-height: 1.2 !important;
+    }
+    
+    header .flex-wrap {
+        gap: 0.35rem !important; /* Spațiere micro-badge-uri */
+    }
+
+    /* Compactare container eșantion din navbar */
+    header .bg-white\/10 {
+        padding: 0.4rem 0.75rem !important;
+        border-radius: 0.75rem !important;
+        margin-top: 0.25rem;
+        width: 100% !important; /* Se întinde frumos pe un singur rând pe ecrane foarte mici */
+        justify-content: space-between;
+    }
+    
+    header .bg-white\/10 .text-right {
+        text-align: left !important;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    header .bg-white\/10 span {
+        display: inline-block !important;
+    }
+
+    /* 2. RESTRUCTURARE STRUCTURĂ PRINCIPALĂ (Scroll general fluid) */
     #app-content {
         flex-direction: column !important;
         overflow-y: auto !important;
         height: auto !important;
-    }
-
-    aside {
-        width: 100% !important;
-        border-right: none !important;
-        border-bottom: 1px solid #e2e8f0 !important;
-        padding: 1rem !important;
-        flex-shrink: initial !important;
     }
 
     main {
@@ -42,90 +76,173 @@
         overflow: visible !important;
     }
 
-    /* 2. Meniul de tab-uri - derulare orizontală fără rupere de rând */
-    nav {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        gap: 1rem !important;
-        overflow-x: auto !important;
-        white-space: nowrap !important;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none; /* Ascunde scrollbar pe Firefox */
-    }
-    
-    nav::-webkit-scrollbar {
-        display: none; /* Ascunde scrollbar pe Chrome/Safari */
+    /* 3. PANOU DE FILTRARE MODERN (Compact, tip Grid, ușor de navigat) */
+    aside {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        padding: 1rem !important;
+        background-color: #f8fafc !important; /* Fundal fin de diferențiere */
+        flex-shrink: initial !important;
     }
 
-    .tab-btn {
-        padding-top: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
-        font-size: 0.8rem !important;
+    aside h3 {
+        margin-bottom: 0.75rem !important;
     }
 
-    /* 3. Optimizare spațiu pentru grafice */
-    .relative.h-48, .relative.h-56, .relative.h-64, .relative.h-72 {
-        height: 240px !important; /* Înălțime fixă optimă pe mobil */
-    }
-
-    .grid-cols-2 {
-        grid-template-cols: 1fr !important; /* Stivuiește profilul demografic (Gen/Mediu) */
-    }
-
-    /* 4. Corecții la cardurile KPI (stivuire 2x2 în loc de linie lungă) */
-    .grid-cols-1.sm:grid-cols-2.lg:grid-cols-4 {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    /* Convertim filtrele într-un Grid curat pe 2 coloane (fără liste lungi și obositoare) */
+    aside .flex-col.gap-4 {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
         gap: 0.75rem !important;
     }
 
-    /* 5. Ajustări pentru Tab-ul 2 (Competențe & Detalii) */
-    #tab-skills {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
+    aside .flex-col.gap-4 > div {
+        margin-bottom: 0 !important;
     }
 
-    #tab-skills .grid-cols-1.lg:grid-cols-3 {
-        grid-template-columns: 1fr !important; /* Stivuiește lista de competențe și panoul de detalii */
+    /* Creștem înălțimea select-urilor la 44px (touch target optim conform ghidurilor iOS/Android) */
+    aside select {
+        height: 44px !important;
+        padding: 0 0.75rem !important;
+        font-size: 0.825rem !important;
+        border-radius: 0.75rem !important;
+        background-color: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
     }
 
-    #skills-list {
-        max-height: 350px !important; /* Limitează înălțimea listei pe mobil */
+    aside .mt-auto {
+        display: none !important; /* Ascundem textele explicative statice din sidebar pe mobil */
     }
 
-    /* 6. Formularul de căutare calitativă (Tab-ul 4) */
-    #tab-text .flex-col.lg:flex-row {
-        flex-direction: column !important;
+    /* 4. MENIUL DE TAB-URI TIP „APP PILLS” (Se simte ca o aplicație nativă) */
+    nav {
+        padding: 0.5rem 1rem !important;
+        gap: 0.5rem !important;
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    nav::-webkit-scrollbar {
+        display: none; /* Ascundem bara de scroll pe iOS și Android pentru aspect curat */
+    }
+
+    .tab-btn {
+        padding: 0.5rem 0.85rem !important;
+        font-size: 0.775rem !important;
+        border-radius: 9999px !important; /* Formă ovală de pastilă */
+        border: 1px solid #e2e8f0 !important;
+        background-color: #f1f5f9 !important;
+        color: #64748b !important;
+        transition: all 0.2s ease !important;
+    }
+
+    /* Stilul pastilei active */
+    .tab-btn[data-tab].border-brand-600 {
+        background-color: #8b5cf6 !important; /* Culoarea violet de brand */
+        color: #ffffff !important;
+        border-color: #8b5cf6 !important;
+        font-weight: 700 !important;
+    }
+
+    /* 5. CARDS KPI (Derulare orizontală cu fixare magnetică - Snap Align) */
+    .grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
+        display: flex !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        gap: 1rem !important;
+        padding-bottom: 0.5rem !important;
+        scrollbar-width: none;
+    }
+
+    .grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4::-webkit-scrollbar {
+        display: none;
+    }
+
+    .grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > div {
+        flex: 0 0 85% !important; /* Fiecare card ocupă 85% din ecran, lăsând următorul vizibil la margine */
+        scroll-snap-align: center !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    /* 6. GRAFICE COMPACTE (Evităm overflow-ul) */
+    .relative.h-48, .relative.h-56, .relative.h-64, .relative.h-72 {
+        height: 220px !important; /* Înălțime perfect adaptată ecranelor de mobil */
+    }
+
+    .grid-cols-2 {
+        grid-template-columns: 1fr !important; /* Stivuim vertical profilul demografic (Gen/Mediu) */
         gap: 1rem !important;
     }
 
-    #tab-text .w-full.lg:w-72 {
-        width: 100% !important;
+    /* 7. OPTIMIZARE TAB-UL 2 (Competențe, Likert & Detalii) */
+    #tab-skills {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1.25rem !important;
+    }
+
+    #tab-skills .grid-cols-1.lg\:grid-cols-3 {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1.25rem !important;
+    }
+
+    #skills-list {
+        max-height: 280px !important; /* Permite scroll intern fin pe listă */
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 0.5rem !important;
+        background-color: #ffffff;
+    }
+
+    #detail-active {
+        border-top: 3px solid #8b5cf6 !important;
+        padding-top: 1rem !important;
+    }
+
+    /* 8. OPTIMIZARE FEEDBACK DESCHIS (Tab-ul 4) */
+    #tab-text .flex-col.lg\:flex-row {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.75rem !important;
     }
 
     #text-responses-container {
-        grid-template-columns: 1fr !important; /* O singură coloană pentru feedback-uri */
-        max-height: 400px !important;
+        grid-template-columns: 1fr !important; /* Un singur card pe rând */
+        max-height: 380px !important;
     }
 
-    /* 7. Modalul QR Pop-up */
+    /* 9. MODALUL QR (Să nu depășească ecranul) */
     #qr-modal .max-w-sm {
-        max-width: 90% !important;
+        max-width: 92% !important;
+        border-radius: 2rem !important;
     }
 
     #qr-modal img {
-        width: 100% !important;
-        height: auto !important;
+        width: 220px !important;
+        height: 220px !important;
     }
 }
 
-/* --- Corecții specifice pentru Tablete (768px - 1024px) --- */
+/* ==========================================================================
+   REGULI PENTRU TABLETE (ecrane de la 768px la 1024px)
+   ========================================================================== */
 @media (min-width: 768px) and (max-width: 1024px) {
     aside {
-        width: 240px !important;
+        width: 230px !important;
     }
     
-    .grid-cols-1.sm:grid-cols-2.lg:grid-cols-4 {
+    aside .flex-col.gap-4 {
+        gap: 0.75rem !important;
+    }
+    
+    .grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 }
