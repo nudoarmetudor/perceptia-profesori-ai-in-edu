@@ -2,6 +2,8 @@
 
 Studiu național privind percepția, competențele și barierele cadrelor didactice. Un instrument analitic modern conceput ca o aplicație web **Single-Page Application (SPA)** pentru interpretarea cantitativă și calitativă a datelor din chestionar.
 
+# Link: https://nudoarmetudor.github.io/perceptia-profesori-ai-in-edu/
+
 ---
 
 # Structura Interfeței și Meniul de Navigare
