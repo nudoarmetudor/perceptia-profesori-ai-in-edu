@@ -719,69 +719,81 @@
             });
         }
 
-        function identifyColumns(headers, data) {
+                function identifyColumns(headers, data) {
             columnsConfig = {
                 metadata: {},
                 scales: [],
                 texts: []
             };
-
-            headers.forEach((header) => {
+        
+            headers.forEach((header, index) => {
                 const lower = header.toLowerCase();
-
-                if (lower.includes('timestamp')) {
-                    columnsConfig.metadata.timestamp = header;
-                } else if (lower.includes('genul') || lower === 'gen') {
-                    columnsConfig.metadata.gender = header;
-                } else if (lower.includes('nivelul de') || lower.includes('clasele') || lower.includes('predați')) {
-                    columnsConfig.metadata.level = header;
-                } else if (lower.includes('disciplina') || lower.includes('curricular')) {
-                    columnsConfig.metadata.subject = header;
-                } else if (lower.includes('vechimea') || lower.includes('experien')) {
-                    columnsConfig.metadata.experience = header;
-                } else if (lower.includes('localitatea') || lower.includes('mediu') || lower.includes('oraș') || lower.includes('sat')) {
-                    columnsConfig.metadata.location = header;
-                } else {
-                    let isLikert = true;
-                    let numericCount = 0;
-                    let totalValids = 0;
-
-                    for (let i = 0; i < Math.min(data.length, 25); i++) {
-                        const val = data[i][header];
-                        if (val !== undefined && val !== null && val.toString().trim() !== '') {
-                            totalValids++;
-                            const firstChar = val.toString().trim().charAt(0);
-                            const parsedInt = parseInt(firstChar, 10);
-                            if (!isNaN(parsedInt) && parsedInt >= 1 && parsedInt <= 7) {
-                                numericCount++;
-                            } else {
-                                isLikert = false;
-                                break;
-                            }
-                        }
+        
+                // LIMITARE: Identificăm metadata demografică doar din primele 7 coloane ale CSV-ului.
+                // Acest lucru previne ca întrebările de opinie de mai jos (Likert) să ne deturneze filtrele.
+                if (index < 7) {
+                    if (lower.includes('timestamp')) {
+                        columnsConfig.metadata.timestamp = header;
+                        return;
+                    } else if (lower.includes('genul') || lower === 'gen') {
+                        columnsConfig.metadata.gender = header;
+                        return;
+                    } else if (lower.includes('nivelul') || lower.includes('clasele') || lower.includes('predați') || lower.includes('predati')) {
+                        columnsConfig.metadata.level = header;
+                        return;
+                    } else if (lower.includes('disciplina') || lower.includes('curricular')) {
+                        columnsConfig.metadata.subject = header;
+                        return;
+                    } else if (lower.includes('vechimea') || lower.includes('experien')) {
+                        columnsConfig.metadata.experience = header;
+                        return;
+                    } else if (lower.includes('localitatea') || lower.includes('mediu') || lower.includes('oraș') || lower.includes('sat') || lower.includes('oras')) {
+                        columnsConfig.metadata.location = header;
+                        return;
                     }
-
-                    if (isLikert && numericCount > 0) {
-                        columnsConfig.scales.push(header);
-                    } else {
-                        if (header.trim() !== '') {
-                            columnsConfig.texts.push(header);
+                }
+        
+                // Toate celelalte coloane de după indexul 6 sunt tratate exclusiv ca întrebări de opinie/feedback
+                let isLikert = true;
+                let numericCount = 0;
+                let totalValids = 0;
+        
+                for (let i = 0; i < Math.min(data.length, 25); i++) {
+                    const val = data[i][header];
+                    if (val !== undefined && val !== null && val.toString().trim() !== '') {
+                        totalValids++;
+                        const firstChar = val.toString().trim().charAt(0);
+                        const parsedInt = parseInt(firstChar, 10);
+                        if (!isNaN(parsedInt) && parsedInt >= 1 && parsedInt <= 7) {
+                            numericCount++;
+                        } else {
+                            isLikert = false;
+                            break;
                         }
                     }
                 }
+        
+                if (isLikert && numericCount > 0) {
+                    columnsConfig.scales.push(header);
+                } else {
+                    if (header.trim() !== '') {
+                        columnsConfig.texts.push(header);
+                    }
+                }
             });
-
+        
+            // Fallbacks de siguranță aplicate doar pe zona demografică de la începutul tabelului
             if (!columnsConfig.metadata.gender) {
-                columnsConfig.metadata.gender = headers.find(h => h.toLowerCase().includes('gen')) || null;
+                columnsConfig.metadata.gender = headers.slice(0, 7).find(h => h.toLowerCase().includes('gen')) || null;
             }
             if (!columnsConfig.metadata.level) {
-                columnsConfig.metadata.level = headers.find(h => h.toLowerCase().includes('nivel')) || null;
+                columnsConfig.metadata.level = headers.slice(0, 7).find(h => h.toLowerCase().includes('nivel')) || null;
             }
             if (!columnsConfig.metadata.location) {
-                columnsConfig.metadata.location = headers.find(h => h.toLowerCase().includes('localit')) || null;
+                columnsConfig.metadata.location = headers.slice(0, 7).find(h => h.toLowerCase().includes('localit') || h.toLowerCase().includes('mediu')) || null;
             }
             if (!columnsConfig.metadata.experience) {
-                columnsConfig.metadata.experience = headers.find(h => h.toLowerCase().includes('vechim')) || null;
+                columnsConfig.metadata.experience = headers.slice(0, 7).find(h => h.toLowerCase().includes('vechim') || h.toLowerCase().includes('experien')) || null;
             }
         }
 
