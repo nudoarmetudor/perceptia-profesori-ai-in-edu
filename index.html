@@ -101,6 +101,12 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                     Schimbă Datele (CSV)
                 </button>
+                <!-- Buton afișare QR Code -->
+                <button id="btn-qr" class="bg-slate-800 hover:bg-slate-700 transition-colors text-white p-3 rounded-xl border border-slate-700 flex items-center justify-center shadow-md shrink-0" title="Scanează QR Code">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </header>
@@ -480,6 +486,33 @@
 
             </div>
         </main>
+        <!-- Modal QR Code pop-up -->
+        <div id="qr-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 flex flex-col items-center relative transition-all duration-300">
+                <!-- Butonul de închidere (X) -->
+                <button id="close-qr-modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-100 rounded-full">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                
+                <h3 class="text-base font-bold text-slate-800 mb-1 text-center mt-2">Accesează pe Telefon</h3>
+                <p class="text-xs text-slate-500 text-center mb-5">Scanează codul QR de mai jos pentru a deschide tabloul de bord direct pe mobil.</p>
+                
+                <!-- Zona imagine QR -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-4 shadow-inner">
+                    <img src="perceptia-profesori-ai-in-edu.png" class="w-64 h-64 object-contain" alt="QR Code" onerror="this.style.display='none'; document.getElementById('qr-error').classList.remove('hidden');">
+                    <div id="qr-error" class="hidden text-center text-xs text-rose-500 py-12 px-4">
+                        <p class="font-bold">Imaginea QR nu a putut fi încărcată.</p>
+                        <p class="mt-1 text-[10px]">Asigură-te că fișierul <code>perceptia-profesori-ai-in-edu.png</code> este plasat în același folder pe GitHub.</p>
+                    </div>
+                </div>
+                
+                <button id="close-qr-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors shadow-md">
+                    Închide
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- ================================================================= -->
@@ -606,6 +639,34 @@
 
         // Inițializare pe încărcarea paginii
         window.addEventListener('DOMContentLoaded', () => {
+            // Logica pentru deschiderea și închiderea modalului QR Code
+            const qrButton = document.getElementById('btn-qr');
+            const qrModal = document.getElementById('qr-modal');
+            const closeQrModal = document.getElementById('close-qr-modal');
+            const closeQrBtn = document.getElementById('close-qr-btn');
+            
+            if (qrButton && qrModal) {
+                // Deschide modalul la click pe butonul QR
+                qrButton.addEventListener('click', () => {
+                    qrModal.classList.remove('hidden');
+                });
+            
+                // Funcție de închidere
+                const hideModal = () => {
+                    qrModal.classList.add('hidden');
+                };
+            
+                closeQrModal.addEventListener('click', hideModal);
+                closeQrBtn.addEventListener('click', hideModal);
+            
+                // Închide modalul dacă se dă click în afara ferestrei albe (pe fundalul întunecat)
+                qrModal.addEventListener('click', (e) => {
+                    if (e.target === qrModal) {
+                        hideModal();
+                    }
+                });
+            }
+            
             setupDragAndDrop();
             tryAutoLoad();
             setupTabNavigation();
