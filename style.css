@@ -20,6 +20,18 @@
     background: #94a3b8;
 }
 
+/* --- Reguli Globale Modal QR (Desktop & General) --- */
+#qr-modal .max-w-sm {
+    max-width: 480px !important; /* Ajustare dimensiune pe desktop */
+    width: 90% !important;
+}
+
+#qr-modal img {
+    width: 100% !important;
+    max-width: 350px !important;
+    height: auto !important;
+}
+
 /* ==========================================================================
    REGULI DE SUPRASCRIERE PENTRU MOBIL (ecrane < 768px)
    ========================================================================== */
@@ -247,15 +259,21 @@
         max-height: 380px !important;
     }
 
-    /* 9. MODALUL QR POP-UP */
+    /* 9. MODALUL QR POP-UP (Mărit substanțial pentru a folosi întreg ecranul de mobil) */
     #qr-modal .max-w-sm {
-        max-width: 92% !important;
-        border-radius: 2rem !important;
+        max-width: 95vw !important;
+        width: 95vw !important;
+        max-height: 95vh !important;
+        height: auto !important;
+        padding: 1.5rem !important;
+        border-radius: 1.5rem !important;
     }
 
     #qr-modal img {
-        width: 200px !important;
-        height: 200px !important;
+        width: 82vw !important;
+        height: 82vw !important;
+        max-width: 360px !important;
+        max-height: 360px !important;
     }
 }
 
