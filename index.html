@@ -184,6 +184,19 @@
                     </select>
                 </div>
 
+                <!-- Grup Discipline predate (NOU AGREGAT) -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Aria Curriculară predată</label>
+                    <select id="filter-subject-group" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+                        <option value="all">Toate grupurile</option>
+                        <option value="Umanist & Limbi">📚 Umanist & Limbi</option>
+                        <option value="Real / STEM">📐 Real / STEM</option>
+                        <option value="Învățământ Primar & Suport">✏️ Învățământ Primar & Suport</option>
+                        <option value="Arte, Sport & Tehnologii">🎨 Arte, Sport & Tehnologii</option>
+                        <option value="Altele / Interdisciplinar">🌐 Altele / Interdisciplinar</option>
+                    </select>
+                </div>
+
                 <!-- Vechime -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Vechime în Învățământ</label>
@@ -266,7 +279,7 @@
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             </div>
                             <div>
-                                <span class="text-xs text-slate-400 block font-medium uppercase tracking-wider">Vechime majoritară</span>
+                                <span class="text-xs text-slate-400 block font-medium uppercase tracking-wider">Vechime Majoritară</span>
                                 <span id="kpi-major-experience" class="text-lg font-black text-slate-800 block truncate max-w-[180px]">-</span>
                                 <span id="kpi-major-experience-pct" class="text-xs text-amber-600 block mt-0.5 font-semibold">0% din total</span>
                             </div>
@@ -301,6 +314,14 @@
                             <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Distribuția pe Niveluri de Învățământ</h4>
                             <div class="relative h-64 grow">
                                 <canvas id="chart-level"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Discipline Predate (Top 10) -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col lg:col-span-2">
+                            <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Discipline predate / Arii curriculare (Top 10)</h4>
+                            <div class="relative h-72 grow">
+                                <canvas id="chart-subject"></canvas>
                             </div>
                         </div>
                     </div>
@@ -465,7 +486,7 @@
     <!-- JAVASCRIPT LOGIC (Dacă separați pe GitHub, mutați tot de mai jos în app.js) -->
     <!-- ================================================================= -->
     <script>
-        // Opțiuni fișiere ordonate după prioritate (DateChestionar.csv este preferat deoarece are diacritice corecte)
+        // Opțiuni fișiere ordonate după prioritate
         const fileOptions = [
             'DateChestionar.csv',
             'Chestionar_ Utilizarea AI generative în educația din Republica Moldova (Responses).CSV'
@@ -482,7 +503,7 @@
         let activeTab = 'tab-overview';
         let chartsInstance = {}; 
 
-        // Dicționar pentru înlocuire diacritice deteriorate (util pentru fișierele vechi degradate)
+        // Dicționar pentru înlocuire diacritice deteriorate
         const replacementRules = [
             { regex: /înv\?\?\?mânt/gi, replace: "învățământ" },
             { regex: /înv\?\?mânt/gi, replace: "învățământ" },
@@ -527,19 +548,46 @@
             { regex: / \?i /g, replace: " și " }
         ];
 
-        // Curățare text degradat (efectuată doar dacă textul conține semne de întrebare suspecte)
+        // Clasificare automată și agregare discipline în grupuri logice mari
+        function getSubjectGroup(subject) {
+            if (!subject) return 'Altele / Interdisciplinar';
+            const s = subject.toLowerCase().trim();
+            
+            // 1. Învățământ Primar & Suport psihopedagogic
+            if (s.includes('primar') || s.includes('invatator') || s.includes('învățător') || s.includes('logoped') || s.includes('psiholog') || s.includes('preșcolar') || s.includes('prescolar') || s.includes('educator') || s.includes('clasele i-iv')) {
+                return 'Învățământ Primar & Suport';
+            }
+            // 2. Real / STEM
+            if (s.includes('matematic') || s.includes('fizic') || s.includes('chim') || s.includes('biolog') || s.includes('informatic') || s.includes('științ') || s.includes('stiint') || s.includes('stem') || s.includes('tehnolog') || s.includes('astronomie') || s.includes('robotic')) {
+                // Prevenim deturnarea dacă e educație fizică (care merge la sport)
+                if (s.includes('educație fizică') || s.includes('educatie fizica')) {
+                    return 'Arte, Sport & Tehnologii';
+                }
+                return 'Real / STEM';
+            }
+            // 3. Umanist & Limbi străine/maternă
+            if (s.includes('român') || s.includes('roman') || s.includes('englez') || s.includes('francez') || s.includes('german') || s.includes('rus') || s.includes('limb') || s.includes('istor') || s.includes('geograf') || s.includes('civic') || s.includes('social') || s.includes('umanist') || s.includes('literatur') || s.includes('religie') || s.includes('filozofie') || s.includes('matern')) {
+                return 'Umanist & Limbi';
+            }
+            // 4. Arte, Sport & Tehnologii Practice/Muzicale
+            if (s.includes('sport') || s.includes('muzic') || s.includes('plastic') || s.includes('desen') || s.includes('arte') || s.includes('artă') || s.includes('tehnologic') || s.includes('fizică') || s.includes('fizica')) {
+                return 'Arte, Sport & Tehnologii';
+            }
+            
+            return 'Altele / Interdisciplinar';
+        }
+
+        // Curățare text degradat
         function sanitizeText(str) {
             if (!str) return '';
             let clean = str.toString();
 
-            // Dacă textul nu conține "?", înseamnă că are diacritice perfecte (ex: DateChestionar.csv) și îl returnăm neatins
             if (!clean.includes('?')) return clean.trim();
 
             replacementRules.forEach(r => {
                 clean = clean.replace(r.regex, r.replace);
             });
 
-            // Fallback înlocuiri simple de caractere sparte
             clean = clean.replace(/ă\?/g, 'ă')
                          .replace(/â\?/g, 'â')
                          .replace(/î\?/g, 'î')
@@ -579,14 +627,13 @@
                     if (response.ok) {
                         const text = await response.text();
                         processCSVText(text, filePath);
-                        return; // Oprim execuția deoarece am încărcat cu succes un fișier
+                        return;
                     }
                 } catch (e) {
                     console.log(`Eroare la încărcarea automată a ${filePath}:`, e);
                 }
             }
             
-            // Dacă ambele fișiere au eșuat (de exemplu din cauza CORS local în afara serverului)
             statusText.innerHTML = `
                 <span class="text-slate-400">Fișierele locale nu au putut fi găsite în folder. Vă rugăm să folosiți zona de mai jos pentru upload.</span>
             `;
@@ -650,7 +697,6 @@
         function processCSVText(text, loadedFilename) {
             const sanitizedText = sanitizeText(text);
 
-            // Folosim PapaParse fără delimitor forțat pentru a detecta automat ',' sau ';'
             Papa.parse(sanitizedText, {
                 header: true,
                 skipEmptyLines: true,
@@ -669,11 +715,9 @@
                         return;
                     }
 
-                    // Actualizare UI detalii delimitator și nume fișier
                     document.getElementById('delimiter-badge').innerText = `Separator: "${detectedDelimiter}"`;
                     document.getElementById('active-filename').innerText = loadedFilename;
 
-                    // Curățare date suplimentară pentru valori
                     const cleanedData = data.map(row => {
                         let cleanedRow = {};
                         for (let key in row) {
@@ -707,7 +751,6 @@
                     document.getElementById('upload-screen').classList.add('hidden');
                     document.getElementById('app-content').classList.remove('hidden');
 
-                    // Activare badge status
                     document.getElementById('source-badge').classList.add('hidden');
                     const autoBadge = document.getElementById('auto-badge');
                     autoBadge.classList.remove('hidden');
@@ -719,18 +762,16 @@
             });
         }
 
-                function identifyColumns(headers, data) {
+        function identifyColumns(headers, data) {
             columnsConfig = {
                 metadata: {},
                 scales: [],
                 texts: []
             };
-        
+
             headers.forEach((header, index) => {
                 const lower = header.toLowerCase();
-        
-                // LIMITARE: Identificăm metadata demografică doar din primele 7 coloane ale CSV-ului.
-                // Acest lucru previne ca întrebările de opinie de mai jos (Likert) să ne deturneze filtrele.
+
                 if (index < 7) {
                     if (lower.includes('timestamp')) {
                         columnsConfig.metadata.timestamp = header;
@@ -741,7 +782,7 @@
                     } else if (lower.includes('nivelul') || lower.includes('clasele') || lower.includes('predați') || lower.includes('predati')) {
                         columnsConfig.metadata.level = header;
                         return;
-                    } else if (lower.includes('disciplina') || lower.includes('curricular')) {
+                    } else if (lower.includes('disciplina') || lower.includes('curricular') || lower.includes('materia')) {
                         columnsConfig.metadata.subject = header;
                         return;
                     } else if (lower.includes('vechimea') || lower.includes('experien')) {
@@ -752,12 +793,11 @@
                         return;
                     }
                 }
-        
-                // Toate celelalte coloane de după indexul 6 sunt tratate exclusiv ca întrebări de opinie/feedback
+
                 let isLikert = true;
                 let numericCount = 0;
                 let totalValids = 0;
-        
+
                 for (let i = 0; i < Math.min(data.length, 25); i++) {
                     const val = data[i][header];
                     if (val !== undefined && val !== null && val.toString().trim() !== '') {
@@ -772,7 +812,7 @@
                         }
                     }
                 }
-        
+
                 if (isLikert && numericCount > 0) {
                     columnsConfig.scales.push(header);
                 } else {
@@ -781,8 +821,7 @@
                     }
                 }
             });
-        
-            // Fallbacks de siguranță aplicate doar pe zona demografică de la începutul tabelului
+
             if (!columnsConfig.metadata.gender) {
                 columnsConfig.metadata.gender = headers.slice(0, 7).find(h => h.toLowerCase().includes('gen')) || null;
             }
@@ -794,6 +833,9 @@
             }
             if (!columnsConfig.metadata.experience) {
                 columnsConfig.metadata.experience = headers.slice(0, 7).find(h => h.toLowerCase().includes('vechim') || h.toLowerCase().includes('experien')) || null;
+            }
+            if (!columnsConfig.metadata.subject) {
+                columnsConfig.metadata.subject = headers.slice(0, 7).find(h => h.toLowerCase().includes('disciplin') || h.toLowerCase().includes('curricular')) || null;
             }
         }
 
@@ -838,7 +880,7 @@
         }
 
         function setupFiltersListeners() {
-            const filters = ['filter-gender', 'filter-location', 'filter-level', 'filter-experience'];
+            const filters = ['filter-gender', 'filter-location', 'filter-level', 'filter-experience', 'filter-subject-group'];
             filters.forEach(id => {
                 document.getElementById(id).addEventListener('change', applyFilters);
             });
@@ -860,6 +902,7 @@
             const locationVal = document.getElementById('filter-location').value;
             const levelVal = document.getElementById('filter-level').value;
             const expVal = document.getElementById('filter-experience').value;
+            const groupVal = document.getElementById('filter-subject-group').value; // NOU
 
             filteredData = originalData.filter(row => {
                 let match = true;
@@ -875,6 +918,11 @@
                 }
                 if (expVal !== 'all' && columnsConfig.metadata.experience) {
                     match = match && row[columnsConfig.metadata.experience] === expVal;
+                }
+                // Filtrarea logică după grupul de discipline (aria curriculară agregată)
+                if (groupVal !== 'all' && columnsConfig.metadata.subject) {
+                    const rowGroup = getSubjectGroup(row[columnsConfig.metadata.subject]);
+                    match = match && rowGroup === groupVal;
                 }
 
                 return match;
@@ -972,6 +1020,7 @@
             destroyChart('environment');
             destroyChart('experience');
             destroyChart('level');
+            destroyChart('subject'); 
 
             if (columnsConfig.metadata.gender) {
                 const genData = countOccurrences(filteredData, columnsConfig.metadata.gender);
@@ -1076,6 +1125,53 @@
                         maintainAspectRatio: false,
                         indexAxis: 'y',
                         plugins: { legend: { display: false } },
+                        scales: {
+                            x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                            y: { ticks: { font: { size: 11 } } }
+                        }
+                    }
+                });
+            }
+
+            // REDESENARE GRAPH TOP 10 DISCIPLINE
+            if (columnsConfig.metadata.subject) {
+                const subjData = countOccurrences(filteredData, columnsConfig.metadata.subject);
+                
+                const sortedSubj = Object.entries(subjData)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10);
+                    
+                const labels = sortedSubj.map(item => truncateString(item[0], 25));
+                const values = sortedSubj.map(item => item[1]);
+
+                const ctx = document.getElementById('chart-subject').getContext('2d');
+                chartsInstance['subject'] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Număr Profesori',
+                            data: values,
+                            backgroundColor: 'rgba(139, 92, 246, 0.85)', 
+                            borderColor: '#7c3aed',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        return sortedSubj[context[0].dataIndex][0];
+                                    }
+                                }
+                            }
+                        },
                         scales: {
                             x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
                             y: { ticks: { font: { size: 11 } } }
@@ -1453,6 +1549,7 @@
             return counts;
         }
 
+        // Distruge instanța Chart.js dacă există (vital la regenerare dinamica)
         function destroyChart(name) {
             if (chartsInstance[name]) {
                 chartsInstance[name].destroy();
