@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="ro" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analiză AI în Educație - Republica Moldova</title>
+    
+    <!-- ========================================== -->
+    <!-- STILURI EXTERNE (CDN)                      -->
+    <!-- ========================================== -->
+    <!-- Tailwind CSS pentru design premium -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js pentru grafice interactive -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse pentru procesare CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <!-- Fontul Inter din Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- ================================================================= -->
+    <!-- CSS INTERN (Dacă separați pe GitHub, mutați tot de mai jos în style.css) -->
+    <!-- ================================================================= -->
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col text-slate-800">
+
+    <!-- Header static -->
+    <header class="bg-gradient-to-r from-brand-900 via-indigo-950 to-slate-900 text-white shadow-xl px-6 py-5 shrink-0">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <span class="bg-brand-500 text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full text-white shadow-sm">
+                        Studiu Republica Moldova
+                    </span>
+                    <span id="source-badge" class="bg-amber-500 text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full text-slate-950 shadow-sm hidden">
+                        Fișier Încărcat Manual
+                    </span>
+                    <span id="auto-badge" class="bg-emerald-500 text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full text-white shadow-sm hidden">
+                        Conectat: <span id="active-filename">Date</span>
+                    </span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+                    Utilizarea AI Generative în Educație
+                </h1>
+                <p class="text-indigo-200 text-sm mt-1 max-w-2xl font-light">
+                    Vizualizarea și analiza percepției profesorilor asupra instrumentelor de inteligență artificială în procesul didactic.
+                </p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2.5 flex items-center gap-4">
+                    <div class="text-right">
+                        <span class="text-xs text-indigo-200 block uppercase tracking-wider">Eșantion Analizat</span>
+                        <span id="total-badge" class="text-2xl font-black text-white">0</span>
+                        <span class="text-xs text-slate-300">profesori</span>
+                    </div>
+                    <div class="h-10 w-px bg-white/20"></div>
+                    <div class="bg-brand-500/20 p-2 rounded-lg text-brand-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                </div>
+                <button id="trigger-upload" class="bg-indigo-600 hover:bg-indigo-500 transition-colors text-white font-medium text-xs px-4 py-3 rounded-xl border border-indigo-400/20 flex items-center justify-center gap-2 shadow-md">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Schimbă Datele (CSV)
+                </button>
+                
+                <!-- Buton afișare QR Code -->
+                <button id="btn-qr" class="bg-slate-800 hover:bg-slate-700 transition-colors text-white p-3 rounded-xl border border-slate-700 flex items-center justify-center shadow-md shrink-0" title="Scanează QR Code">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ecran Inițial: Drag & Drop (Ascuns după încărcare) -->
+    <div id="upload-screen" class="grow flex flex-col items-center justify-center p-6 bg-slate-100 relative">
+        <div class="max-w-xl w-full bg-white rounded-3xl shadow-xl border border-slate-200/80 p-8 text-center relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 w-36 h-36 bg-brand-100 rounded-full blur-2xl"></div>
+            <div class="absolute -left-16 -bottom-16 w-36 h-36 bg-indigo-100 rounded-full blur-2xl"></div>
+            
+            <div class="relative z-10">
+                <div class="mx-auto w-20 h-20 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                    <svg class="w-10 h-10 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                </div>
+                
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Vizualizare Chestionar AI în Educație</h2>
+                <p class="text-slate-500 text-sm mb-6 max-w-md mx-auto">
+                    Aplicația încearcă să încarce automat fișierele de date din depozit. În cazul în care sunteți local și browserul blochează accesul automat, puteți încărca manual fișul CSV mai jos.
+                </p>
+
+                <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-brand-500 transition-colors bg-slate-50 hover:bg-brand-50/20 rounded-2xl p-8 cursor-pointer relative group">
+                    <input type="file" id="csv-input" accept=".csv" class="hidden" />
+                    <p class="text-slate-600 text-sm font-semibold group-hover:text-brand-600 transition-colors">
+                        Trageți fișierul CSV aici sau faceți clic pentru a răsfoi
+                    </p>
+                    <p class="text-slate-400 text-xs mt-1.5">
+                        Acceptă formatul .csv (separat prin virgulă sau punct și virgulă)
+                    </p>
+                </div>
+
+                <div id="load-error" class="hidden mt-4 p-3 bg-rose-50 text-rose-700 text-xs rounded-xl border border-rose-100 flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <span id="error-msg">Nu am putut citi fișierul. Verificați structura acestuia.</span>
+                </div>
+
+                <!-- Încercare automată status -->
+                <div id="auto-load-status" class="mt-6 flex items-center justify-center gap-2 text-xs text-slate-500">
+                    <div class="w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping"></div>
+                    <span id="auto-load-text">Se verifică prezența fișierului DateChestionar.csv...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aplicația Principală (Ascunsă inițial) -->
+    <div id="app-content" class="grow flex flex-col md:flex-row overflow-hidden hidden">
+        
+        <!-- Sidebar Filtre -->
+        <aside class="w-full md:w-80 bg-white border-r border-slate-200 p-5 flex flex-col gap-5 shrink-0 overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Panou de Filtrare</h3>
+                <button id="btn-reset-filters" class="text-xs text-brand-600 hover:text-brand-800 font-medium hover:underline flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17"></path></svg>
+                    Resetează
+                </button>
+            </div>
+
+            <!-- Filtrele dinamice -->
+            <div class="flex flex-col gap-4">
+                <!-- Genul -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Genul Respondentului</label>
+                    <select id="filter-gender" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+                        <option value="all">Toți (Fără filtru)</option>
+                    </select>
+                </div>
+
+                <!-- Mediu -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Mediu de Rezidență</label>
+                    <select id="filter-location" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+                        <option value="all">Toate Mediile</option>
+                    </select>
+                </div>
+
+                <!-- Nivel de Învățământ -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Nivel de Învățământ</label>
+                    <select id="filter-level" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+                        <option value="all">Toate Nivelurile</option>
+                    </select>
+                </div>
+
+                <!-- Grup Discipline predate (Agregat) -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Aria Curriculară predată</label>
+                    <select id="filter-subject-group" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+                        <option value="all">Toate grupurile</option>
+                        <option value="Umanist & Limbi">📚 Umanist & Limbi</option>
+                        <option value="Real / STEM">📐 Real / STEM</option>
+                        <option value="Învățământ Primar & Suport">✏️ Învățământ Primar & Suport</option>
+                        <option value="Arte, Sport & Tehnologii">🎨 Arte, Sport & Tehnologii</option>
+                        <option value="Altele / Interdisciplinar">🌐 Altele / Interdisciplinar</option>
+                    </select>
+                </div>
+
+                <!-- Vechime -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Vechime în Învățământ</label>
+                    <select id="filter-experience" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+                        <option value="all">Toate categoriile</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-auto border-t border-slate-100 pt-4 text-xs text-slate-400 space-y-1">
+                <p>💡 Toate graficele, statisticile și KPI-urile se vor recalcula automat pe baza selecțiilor.</p>
+                <p id="delimiter-badge" class="font-medium text-slate-500">Separator: detecție automată...</p>
+            </div>
+        </aside>
+
+        <!-- Conținut Central (Cu Tab-uri) -->
+        <main class="grow flex flex-col bg-slate-50 overflow-hidden">
+            <!-- Navigare Tab-uri -->
+            <nav class="bg-white border-b border-slate-200 px-6 flex gap-6 shrink-0 shadow-sm overflow-x-auto">
+                <button data-tab="tab-overview" class="tab-btn border-b-2 border-brand-600 text-brand-600 px-1 py-4 text-sm font-semibold flex items-center gap-2 tracking-tight whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    1. Demografie & Profil
+                </button>
+                <button data-tab="tab-skills" class="tab-btn border-b-2 border-transparent text-slate-500 hover:text-slate-800 px-1 py-4 text-sm font-semibold flex items-center gap-2 tracking-tight whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    2. Competențe și Percepții
+                </button>
+                <button data-tab="tab-comparative" class="tab-btn border-b-2 border-transparent text-slate-500 hover:text-slate-800 px-1 py-4 text-sm font-semibold flex items-center gap-2 tracking-tight whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    3. Analiză Comparativă
+                </button>
+                <button data-tab="tab-text" class="tab-btn border-b-2 border-transparent text-slate-500 hover:text-slate-800 px-1 py-4 text-sm font-semibold flex items-center gap-2 tracking-tight whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                    4. Feedback & Text Liber
+                </button>
+            </nav>
+
+            <!-- Zona de conținut dinamic (cu Scroll independent) -->
+            <div class="grow overflow-y-auto p-6 custom-scrollbar">
+                
+                <!-- Secțiunea 1: Prezentare Generală (Demografie) -->
+                <section id="tab-overview" class="tab-content space-y-6">
+                    <!-- KPI Cards Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+                            <div class="p-3 bg-brand-50 text-brand-600 rounded-xl">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 block font-medium uppercase tracking-wider">Cadre Didactice</span>
+                                <span id="kpi-total" class="text-2xl font-black text-slate-800">0</span>
+                                <span class="text-xs text-slate-400 block mt-0.5">răspunsuri active</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+                            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 block font-medium uppercase tracking-wider">Predomină în Mediul</span>
+                                <span id="kpi-major-environment" class="text-2xl font-black text-slate-800">-</span>
+                                <span id="kpi-major-environment-pct" class="text-xs text-emerald-600 block mt-0.5 font-semibold">0% din total</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+                            <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 block font-medium uppercase tracking-wider">Nivel Principal de Predare</span>
+                                <span id="kpi-major-level" class="text-lg font-black text-slate-800 leading-tight block truncate max-w-[180px]">-</span>
+                                <span id="kpi-major-level-pct" class="text-xs text-indigo-600 block mt-0.5 font-semibold">0% din total</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+                            <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 block font-medium uppercase tracking-wider">Vechime Majoritară</span>
+                                <span id="kpi-major-experience" class="text-lg font-black text-slate-800 block truncate max-w-[180px]">-</span>
+                                <span id="kpi-major-experience-pct" class="text-xs text-amber-600 block mt-0.5 font-semibold">0% din total</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Genul & Mediul -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col">
+                            <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Profil Demografic: Gen & Mediu de Rezidență</h4>
+                            <div class="grid grid-cols-2 gap-4 grow items-center">
+                                <div class="relative h-48 flex justify-center">
+                                    <canvas id="chart-gender"></canvas>
+                                </div>
+                                <div class="relative h-48 flex justify-center">
+                                    <canvas id="chart-environment"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vechime -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col">
+                            <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Vechime în Învățământ (Ani)</h4>
+                            <div class="relative h-56 grow">
+                                <canvas id="chart-experience"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Nivelul de Învățământ -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col lg:col-span-2">
+                            <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Distribuția pe Niveluri de Învățământ</h4>
+                            <div class="relative h-64 grow">
+                                <canvas id="chart-level"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Discipline Predate (Top 10) -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col lg:col-span-2">
+                            <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Discipline predate / Arii curriculare (Top 10)</h4>
+                            <div class="relative h-72 grow">
+                                <canvas id="chart-subject"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Secțiunea 2: Competențe și Percepții -->
+                <section id="tab-skills" class="tab-content space-y-6 hidden">
+                    <!-- General self-efficacy score header -->
+                    <div class="bg-gradient-to-r from-brand-500 to-indigo-600 text-white rounded-3xl p-6 shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold">Indicele Global de Autoevaluare AI</h3>
+                            <p class="text-indigo-100 text-xs mt-1 max-w-2xl">
+                                Scorul cumulat calculat ca medie generală pe toate întrebările cu scară Likert (1-7), unde 7 reprezintă acord deplin în abilitățile de utilizare a AI în activitățile didactice.
+                            </p>
+                        </div>
+                        <div class="text-center bg-white/15 px-6 py-4 rounded-2xl backdrop-blur-md shrink-0 w-full md:w-auto">
+                            <span class="text-xs text-indigo-100 uppercase tracking-wider block font-semibold">Media Generală</span>
+                            <span id="global-average" class="text-4xl font-extrabold block">0.00</span>
+                            <span class="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full font-medium mt-1 inline-block">Nivel Moderat</span>
+                        </div>
+                    </div>
+
+                    <!-- Topul Competențelor -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Lista Competențe (2/3 coloane) -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm lg:col-span-2 flex flex-col">
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Clasament Abilități & Autoevaluare</h4>
+                                    <p class="text-xs text-slate-400">Faceți clic pe orice rând din clasament pentru a explora în detaliu răspunsurile profesorilor.</p>
+                                </div>
+                                <span class="text-[10px] bg-slate-100 text-slate-500 font-bold uppercase px-2.5 py-1 rounded-md">Scara Likert 1-7</span>
+                            </div>
+                            
+                            <!-- Lista elemente scrollabila -->
+                            <div id="skills-list" class="space-y-2 grow max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                <!-- Generat dinamic -->
+                            </div>
+                        </div>
+
+                        <!-- Panel Detaliu Element Selectat -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col border-l-4 border-l-brand-500">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Vizualizare Detaliată Întrebare</h4>
+                            
+                            <div id="detail-empty" class="grow flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                                <svg class="w-12 h-12 mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                                <p class="text-sm font-semibold">Nicio întrebare selectată</p>
+                                <p class="text-xs mt-1">Selectați o competență din clasamentul din stânga pentru a vedea analiza distribuției.</p>
+                            </div>
+
+                            <div id="detail-active" class="hidden flex flex-col h-full space-y-4">
+                                <p id="detail-question-text" class="text-sm font-bold text-slate-800 leading-snug">
+                                    -
+                                </p>
+
+                                <!-- Mini Indicatori Cheie -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 uppercase block font-medium">Scor Mediu</span>
+                                        <span id="detail-stat-mean" class="text-xl font-bold text-slate-800">0.00</span>
+                                        <span class="text-[9px] text-slate-400 block">pe scara 1-7</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 uppercase block font-medium">Acord Total (6-7)</span>
+                                        <span id="detail-stat-agreement" class="text-xl font-bold text-emerald-600">0%</span>
+                                        <span class="text-[9px] text-slate-400 block">din eșantion</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 uppercase block font-medium">Mediană</span>
+                                        <span id="detail-stat-median" class="text-xl font-bold text-slate-800">0</span>
+                                        <span class="text-[9px] text-slate-400 block">valoarea din mijloc</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 uppercase block font-medium">Deviație Std</span>
+                                        <span id="detail-stat-std" class="text-xl font-bold text-slate-800">0.00</span>
+                                        <span class="text-[9px] text-slate-400 block">dispersia datelor</span>
+                                    </div>
+                                </div>
+
+                                <!-- Chart cu distribuție -->
+                                <div class="grow relative h-48">
+                                    <canvas id="chart-detail-distribution"></canvas>
+                                </div>
+
+                                <div class="bg-slate-50 p-3 rounded-xl text-[11px] text-slate-500 leading-relaxed border border-slate-100">
+                                    ℹ️ <strong>Acord pozitiv (5-7)</strong> indică profesori încrezători. <strong>Dezacord (1-3)</strong> reprezintă bariere semnificative și nevoia urgentă de formare.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Secțiunea 3: Analiză Comparativă -->
+                <section id="tab-comparative" class="tab-content space-y-6 hidden">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                            <div>
+                                <h4 class="text-base font-bold text-slate-800">Analiză Comparativă între Grupuri Demografice</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Analizați cum variază nivelul de pregătire / percepție pentru fiecare competență în funcție de mediul rezidențial, gen sau experiență.</p>
+                            </div>
+                            
+                            <!-- Control selectare criteriu comparatie -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Criteriu:</span>
+                                <select id="compare-criterium" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option value="location">Mediul Rezidențial (Rural vs. Urban)</option>
+                                    <option value="gender">Genul (Feminin vs. Masculin)</option>
+                                    <option value="experience">Vechimea în Învățământ</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Graficul Comparativ -->
+                        <div class="relative h-[480px] w-full">
+                            <canvas id="chart-comparison-bar"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Secțiunea 4: Răspunsuri Libere (Feedback) -->
+                <section id="tab-text" class="tab-content space-y-6 hidden">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col min-h-[500px]">
+                        <!-- Selectare coloana deschisa si motor cautare -->
+                        <div class="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center border-b border-slate-100 pb-5 mb-5">
+                            <div class="grow max-w-xl">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Întrebarea deschisă selectată:</label>
+                                <select id="text-column-select" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <!-- Generat dinamic din coloanele ramase drept text -->
+                                </select>
+                            </div>
+                            
+                            <div class="w-full lg:w-72 shrink-0">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Căutare cuvinte cheie:</label>
+                                <div class="relative">
+                                    <input type="text" id="text-search-input" placeholder="Caută (ex: timp, cursuri, elevi)..." class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                                    <div class="absolute left-3 top-2.5 text-slate-400">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lista feedback-urilor -->
+                        <div class="grow flex flex-col">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Feed Răspunsuri Directe</span>
+                                <span id="text-count-badge" class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full">0 răspunsuri găsite</span>
+                            </div>
+
+                            <div id="text-responses-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                <!-- Generat dinamic -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal QR Code pop-up -->
+    <div id="qr-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 flex flex-col items-center relative transition-all duration-300">
+            <!-- Butonul de închidere (X) -->
+            <button id="close-qr-modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-100 rounded-full">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            
+            <h3 class="text-base font-bold text-slate-800 mb-1 text-center mt-2">Accesează pe Telefon</h3>
+            <p class="text-xs text-slate-500 text-center mb-5">Scanează codul QR de mai jos pentru a deschide tabloul de bord direct pe mobil.</p>
+            
+            <!-- Zona imagine QR -->
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-4 shadow-inner">
+                <img src="perceptia-profesori-ai-in-edu.png" class="w-64 h-64 object-contain" alt="QR Code" onerror="this.style.display='none'; document.getElementById('qr-error').classList.remove('hidden');">
+                <div id="qr-error" class="hidden text-center text-xs text-rose-500 py-12 px-4">
+                    <p class="font-bold">Imaginea QR nu a putut fi încărcată.</p>
+                    <p class="mt-1 text-[10px]">Asigură-te că fișierul <code>perceptia-profesori-ai-in-edu.png</code> este plasat în același folder pe GitHub.</p>
+                </div>
+            </div>
+            
+            <button id="close-qr-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors shadow-md">
+                Închide
+            </button>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- JAVASCRIPT LOGIC (Dacă separați pe GitHub, mutați tot de mai jos în app.js) -->
+    <!-- ================================================================= -->
+    <script>
+        // Opțiuni fișiere ordonate după prioritate
+        const fileOptions = [
+            'DateChestionar.csv',
+            'Chestionar_ Utilizarea AI generative în educația din Republica Moldova (Responses).CSV'
+        ];
+
+        // Stările Aplicației (Global State)
+        let originalData = []; 
+        let filteredData = []; 
+        let columnsConfig = {
+            metadata: {},
+            scales: [],
+            texts: []
+        };
+        let activeTab = 'tab-overview';
+        let chartsInstance = {}; 
+
+        // Dicționar pentru înlocuire diacritice deteriorate
+        const replacementRules = [
+            { regex: /înv\?\?\?mânt/gi, replace: "învățământ" },
+            { regex: /înv\?\?mânt/gi, replace: "învățământ" },
+            { regex: /înv\?mânt/gi, replace: "învățământ" },
+            { regex: /preda\?i/gi, replace: "predați" },
+            { regex: /curricular\?/gi, replace: "curriculară" },
+            { regex: /ora\?\/sat/gi, replace: "oraș/sat" },
+            { regex: /ora\?/gi, replace: "oraș" },
+            { regex: /capabil\(\?\)/gi, replace: "capabil(ă)" },
+            { regex: /preg\?tit\(\?\)/gi, replace: "pregătit(ă)" },
+            { regex: /educa\?ionale/gi, replace: "educaționale" },
+            { regex: /educa\?ional/gi, replace: "educațional" },
+            { regex: /În\?eleg/gi, replace: "Înțeleg" },
+            { regex: /func\?ioneaz\?/gi, replace: "funcționează" },
+            { regex: /generat\?/gi, replace: "generată" },
+            { regex: /situa\?iile/gi, replace: "situațiile" },
+            { regex: /îmbun\?t\?\?i/gi, replace: "îmbunătăți" },
+            { regex: /înv\?\?area/gi, replace: "învățarea" },
+            { regex: /con\?inutului/gi, replace: "conținutului" },
+            { regex: /activit\?\?i/gi, replace: "activități" },
+            { regex: /limit\?rile/gi, replace: "limitările" },
+            { regex: /preg\?ti/gi, replace: "pregăti" },
+            { regex: /\?i/g, replace: "și" }, 
+            { regex: /sigur\(\?\)/gi, replace: "sigur(ă)" },
+            { regex: /c\?/g, replace: "că" },
+            { regex: /lec\?ie/gi, replace: "lecție" },
+            { regex: /încrez\?tor/gi, replace: "încrezător" },
+            { regex: /utilizeaz\?/gi, replace: "utilizează" },
+            { regex: /întreb\?rilor/gi, replace: "întrebărilor" },
+            { regex: /r\?spunde/gi, replace: "răspunde" },
+            { regex: /Preg\?tirea/gi, replace: "Pregătirea" },
+            { regex: /lec\?ii/gi, replace: "lecții" },
+            { regex: /Neconcordan\?e/gi, replace: "Neconcordanțe" },
+            { regex: /Român\?/gi, replace: "Română" },
+            { regex: /comunit\?\?ilor/gi, replace: "comunităților" },
+            { regex: /practic\?/gi, replace: "practică" },
+            { regex: /or\?/gi, replace: "oră" },
+            { regex: /utiliz\?rii/gi, replace: "utilizării" },
+            { regex: /responsabil\?/gi, replace: "responsabilă" },
+            { regex: /M\?/g, replace: "Mă" },
+            { regex: / s\? /g, replace: " să " },
+            { regex: / \?i /g, replace: " și " }
+        ];
+
+        // Clasificare automată și agregare discipline în grupuri logice mari
+        function getSubjectGroup(subject) {
+            if (!subject) return 'Altele / Interdisciplinar';
+            const s = subject.toLowerCase().trim();
+            
+            // 1. Învățământ Primar & Suport psihopedagogic
+            if (s.includes('primar') || s.includes('invatator') || s.includes('învățător') || s.includes('logoped') || s.includes('psiholog') || s.includes('preșcolar') || s.includes('prescolar') || s.includes('educator') || s.includes('clasele i-iv')) {
+                return 'Învățământ Primar & Suport';
+            }
+            // 2. Real / STEM
+            if (s.includes('matematic') || s.includes('fizic') || s.includes('chim') || s.includes('biolog') || s.includes('informatic') || s.includes('științ') || s.includes('stiint') || s.includes('stem') || s.includes('tehnolog') || s.includes('astronomie') || s.includes('robotic')) {
+                // Prevenim deturnarea dacă e educație fizică (care merge la sport)
+                if (s.includes('educație fizică') || s.includes('educatie fizica')) {
+                    return 'Arte, Sport & Tehnologii';
+                }
+                return 'Real / STEM';
+            }
+            // 3. Umanist & Limbi străine/maternă
+            if (s.includes('român') || s.includes('roman') || s.includes('englez') || s.includes('francez') || s.includes('german') || s.includes('rus') || s.includes('limb') || s.includes('istor') || s.includes('geograf') || s.includes('civic') || s.includes('social') || s.includes('umanist') || s.includes('literatur') || s.includes('religie') || s.includes('filozofie') || s.includes('matern')) {
+                return 'Umanist & Limbi';
+            }
+            // 4. Arte, Sport & Tehnologii Practice/Muzicale
+            if (s.includes('sport') || s.includes('muzic') || s.includes('plastic') || s.includes('desen') || s.includes('arte') || s.includes('artă') || s.includes('tehnologic') || s.includes('fizică') || s.includes('fizica')) {
+                return 'Arte, Sport & Tehnologii';
+            }
+            
+            return 'Altele / Interdisciplinar';
+        }
+
+        // Curățare text degradat
+        function sanitizeText(str) {
+            if (!str) return '';
+            let clean = str.toString();
+
+            if (!clean.includes('?')) return clean.trim();
+
+            replacementRules.forEach(r => {
+                clean = clean.replace(r.regex, r.replace);
+            });
+
+            clean = clean.replace(/ă\?/g, 'ă')
+                         .replace(/â\?/g, 'â')
+                         .replace(/î\?/g, 'î')
+                         .replace(/ș\?/g, 'ș')
+                         .replace(/ț\?/g, 'ț')
+                         .replace(/ţ/g, 'ț')
+                         .replace(/ş/g, 'ș')
+                         .replace(/Ă\?/g, 'Ă')
+                         .replace(/Â\?/g, 'Â')
+                         .replace(/Î\?/g, 'Î')
+                         .replace(/Ş/g, 'Ș')
+                         .replace(/Ţ/g, 'Ț');
+
+            return clean.trim();
+        }
+
+        // Inițializare pe încărcarea paginii
+        window.addEventListener('DOMContentLoaded', () => {
+            // Logica pentru deschiderea și închiderea modalului QR Code
+            const qrButton = document.getElementById('btn-qr');
+            const qrModal = document.getElementById('qr-modal');
+            const closeQrModal = document.getElementById('close-qr-modal');
+            const closeQrBtn = document.getElementById('close-qr-btn');
+
+            if (qrButton && qrModal) {
+                qrButton.addEventListener('click', () => {
+                    qrModal.classList.remove('hidden');
+                });
+
+                const hideModal = () => {
+                    qrModal.classList.add('hidden');
+                };
+
+                closeQrModal.addEventListener('click', hideModal);
+                closeQrBtn.addEventListener('click', hideModal);
+
+                qrModal.addEventListener('click', (e) => {
+                    if (e.target === qrModal) {
+                        hideModal();
+                    }
+                });
+            }
+
+            setupDragAndDrop();
+            tryAutoLoad();
+            setupTabNavigation();
+            
+            document.getElementById('trigger-upload').addEventListener('click', () => {
+                document.getElementById('csv-input').click();
+            });
+            document.getElementById('csv-input').addEventListener('change', handleFileSelect);
+        });
+
+        // Secvențiere automată: Încearcă fișierele din vectorul fileOptions
+        async function tryAutoLoad() {
+            const statusText = document.getElementById('auto-load-text');
+            
+            for (const filePath of fileOptions) {
+                try {
+                    statusText.innerText = `Se verifică prezența fișierului ${filePath}...`;
+                    const response = await fetch(filePath);
+                    if (response.ok) {
+                        const text = await response.text();
+                        processCSVText(text, filePath);
+                        return;
+                    }
+                } catch (e) {
+                    console.log(`Eroare la încărcarea automată a ${filePath}:`, e);
+                }
+            }
+            
+            statusText.innerHTML = `
+                <span class="text-slate-400">Fișierele locale nu au putut fi găsite în folder. Vă rugăm să folosiți zona de mai jos pentru upload.</span>
+            `;
+        }
+
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('drop-zone');
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('border-brand-500', 'bg-brand-50/20');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('border-brand-500', 'bg-brand-50/20');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length) {
+                    handleCSVFile(files[0]);
+                }
+            });
+
+            dropZone.addEventListener('click', () => {
+                document.getElementById('csv-input').click();
+            });
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length) {
+                handleCSVFile(files[0]);
+            }
+        }
+
+        function handleCSVFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                processCSVText(e.target.result, file.name);
+            };
+            reader.onerror = function() {
+                showError("Eroare la citirea fizică a fișierului.");
+            };
+            reader.readAsText(file);
+        }
+
+        function showError(msg) {
+            const errDiv = document.getElementById('load-error');
+            const errMsg = document.getElementById('error-msg');
+            errMsg.innerText = msg;
+            errDiv.classList.remove('hidden');
+        }
+
+        function processCSVText(text, loadedFilename) {
+            const sanitizedText = sanitizeText(text);
+
+            Papa.parse(sanitizedText, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.errors.length > 0 && results.data.length === 0) {
+                        showError("Fișierul pare să nu aibă un format valid sau delimitatorul este greșit.");
+                        return;
+                    }
+                    
+                    const data = results.data;
+                    const headers = results.meta.fields;
+                    const detectedDelimiter = results.meta.delimiter;
+
+                    if (!data || data.length === 0 || !headers) {
+                        showError("Fișierul CSV este gol.");
+                        return;
+                    }
+
+                    document.getElementById('delimiter-badge').innerText = `Separator: "${detectedDelimiter}"`;
+                    document.getElementById('active-filename').innerText = loadedFilename;
+
+                    const cleanedData = data.map(row => {
+                        let cleanedRow = {};
+                        for (let key in row) {
+                            if (row.hasOwnProperty(key)) {
+                                const cleanKey = sanitizeText(key);
+                                let cleanVal = sanitizeText(row[key]);
+                                
+                                if (cleanKey.toLowerCase().includes('genul')) {
+                                    if (cleanVal === 'M') cleanVal = 'Masculin';
+                                    if (cleanVal === 'F') cleanVal = 'Feminin';
+                                }
+                                if (cleanKey.toLowerCase().includes('localitatea')) {
+                                    if (cleanVal.toLowerCase().includes('rural')) cleanVal = 'Rural';
+                                    if (cleanVal.toLowerCase().includes('urban')) cleanVal = 'Urban';
+                                    if (cleanVal.toLowerCase().includes('sat')) cleanVal = 'Rural';
+                                    if (cleanVal.toLowerCase().includes('oras') || cleanVal.toLowerCase().includes('oraș')) cleanVal = 'Urban';
+                                }
+                                cleanedRow[cleanKey] = cleanVal;
+                            }
+                        }
+                        return cleanedRow;
+                    });
+
+                    const cleanedHeaders = headers.map(h => sanitizeText(h));
+
+                    originalData = cleanedData;
+                    filteredData = [...cleanedData];
+
+                    identifyColumns(cleanedHeaders, cleanedData);
+
+                    document.getElementById('upload-screen').classList.add('hidden');
+                    document.getElementById('app-content').classList.remove('hidden');
+
+                    document.getElementById('source-badge').classList.add('hidden');
+                    const autoBadge = document.getElementById('auto-badge');
+                    autoBadge.classList.remove('hidden');
+
+                    populateFilterDropdowns();
+                    setupFiltersListeners();
+                    updateDashboard();
+                }
+            });
+        }
+
+        function identifyColumns(headers, data) {
+            columnsConfig = {
+                metadata: {},
+                scales: [],
+                texts: []
+            };
+
+            headers.forEach((header, index) => {
+                const lower = header.toLowerCase();
+
+                if (index < 7) {
+                    if (lower.includes('timestamp')) {
+                        columnsConfig.metadata.timestamp = header;
+                        return;
+                    } else if (lower.includes('genul') || lower === 'gen') {
+                        columnsConfig.metadata.gender = header;
+                        return;
+                    } else if (lower.includes('nivelul') || lower.includes('clasele') || lower.includes('predați') || lower.includes('predati')) {
+                        columnsConfig.metadata.level = header;
+                        return;
+                    } else if (lower.includes('disciplina') || lower.includes('curricular') || lower.includes('materia')) {
+                        columnsConfig.metadata.subject = header;
+                        return;
+                    } else if (lower.includes('vechimea') || lower.includes('experien')) {
+                        columnsConfig.metadata.experience = header;
+                        return;
+                    } else if (lower.includes('localitatea') || lower.includes('mediu') || lower.includes('oraș') || lower.includes('sat') || lower.includes('oras')) {
+                        columnsConfig.metadata.location = header;
+                        return;
+                    }
+                }
+
+                let isLikert = true;
+                let numericCount = 0;
+                let totalValids = 0;
+
+                for (let i = 0; i < Math.min(data.length, 25); i++) {
+                    const val = data[i][header];
+                    if (val !== undefined && val !== null && val.toString().trim() !== '') {
+                        totalValids++;
+                        const firstChar = val.toString().trim().charAt(0);
+                        const parsedInt = parseInt(firstChar, 10);
+                        if (!isNaN(parsedInt) && parsedInt >= 1 && parsedInt <= 7) {
+                            numericCount++;
+                        } else {
+                            isLikert = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (isLikert && numericCount > 0) {
+                    columnsConfig.scales.push(header);
+                } else {
+                    if (header.trim() !== '') {
+                        columnsConfig.texts.push(header);
+                    }
+                }
+            });
+
+            if (!columnsConfig.metadata.gender) {
+                columnsConfig.metadata.gender = headers.slice(0, 7).find(h => h.toLowerCase().includes('gen')) || null;
+            }
+            if (!columnsConfig.metadata.level) {
+                columnsConfig.metadata.level = headers.slice(0, 7).find(h => h.toLowerCase().includes('nivel')) || null;
+            }
+            if (!columnsConfig.metadata.location) {
+                columnsConfig.metadata.location = headers.slice(0, 7).find(h => h.toLowerCase().includes('localit') || h.toLowerCase().includes('mediu')) || null;
+            }
+            if (!columnsConfig.metadata.experience) {
+                columnsConfig.metadata.experience = headers.slice(0, 7).find(h => h.toLowerCase().includes('vechim') || h.toLowerCase().includes('experien')) || null;
+            }
+            if (!columnsConfig.metadata.subject) {
+                columnsConfig.metadata.subject = headers.slice(0, 7).find(h => h.toLowerCase().includes('disciplin') || h.toLowerCase().includes('curricular')) || null;
+            }
+        }
+
+        function populateFilterDropdowns() {
+            populateSingleDropdown('filter-gender', columnsConfig.metadata.gender);
+            populateSingleDropdown('filter-location', columnsConfig.metadata.location);
+            populateSingleDropdown('filter-level', columnsConfig.metadata.level);
+            populateSingleDropdown('filter-experience', columnsConfig.metadata.experience);
+
+            const textSelect = document.getElementById('text-column-select');
+            textSelect.innerHTML = '';
+            columnsConfig.texts.forEach((col, idx) => {
+                const opt = document.createElement('option');
+                opt.value = col;
+                opt.innerText = truncateString(col, 85);
+                textSelect.appendChild(opt);
+            });
+        }
+
+        function populateSingleDropdown(selectId, colName) {
+            const select = document.getElementById(selectId);
+            const firstOption = select.options[0];
+            select.innerHTML = '';
+            select.appendChild(firstOption);
+
+            if (!colName) return;
+
+            const values = new Set();
+            originalData.forEach(row => {
+                const val = row[colName];
+                if (val && val.trim() !== '' && val !== '-') {
+                    values.add(val.trim());
+                }
+            });
+
+            Array.from(values).sort().forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.innerText = val;
+                select.appendChild(opt);
+            });
+        }
+
+        function setupFiltersListeners() {
+            const filters = ['filter-gender', 'filter-location', 'filter-level', 'filter-experience', 'filter-subject-group'];
+            filters.forEach(id => {
+                document.getElementById(id).addEventListener('change', applyFilters);
+            });
+
+            document.getElementById('btn-reset-filters').addEventListener('click', () => {
+                filters.forEach(id => {
+                    document.getElementById(id).value = 'all';
+                });
+                applyFilters();
+            });
+
+            document.getElementById('text-search-input').addEventListener('input', updateTextResponses);
+            document.getElementById('text-column-select').addEventListener('change', updateTextResponses);
+            document.getElementById('compare-criterium').addEventListener('change', renderComparativeChart);
+        }
+
+        function applyFilters() {
+            const genderVal = document.getElementById('filter-gender').value;
+            const locationVal = document.getElementById('filter-location').value;
+            const levelVal = document.getElementById('filter-level').value;
+            const expVal = document.getElementById('filter-experience').value;
+            const groupVal = document.getElementById('filter-subject-group').value; 
+
+            filteredData = originalData.filter(row => {
+                let match = true;
+
+                if (genderVal !== 'all' && columnsConfig.metadata.gender) {
+                    match = match && row[columnsConfig.metadata.gender] === genderVal;
+                }
+                if (locationVal !== 'all' && columnsConfig.metadata.location) {
+                    match = match && row[columnsConfig.metadata.location] === locationVal;
+                }
+                if (levelVal !== 'all' && columnsConfig.metadata.level) {
+                    match = match && row[columnsConfig.metadata.level] === levelVal;
+                }
+                if (expVal !== 'all' && columnsConfig.metadata.experience) {
+                    match = match && row[columnsConfig.metadata.experience] === expVal;
+                }
+                if (groupVal !== 'all' && columnsConfig.metadata.subject) {
+                    const rowGroup = getSubjectGroup(row[columnsConfig.metadata.subject]);
+                    match = match && rowGroup === groupVal;
+                }
+
+                return match;
+            });
+
+            updateDashboard();
+        }
+
+        function setupTabNavigation() {
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tabId = btn.getAttribute('data-tab');
+                    
+                    buttons.forEach(b => {
+                        b.classList.remove('border-brand-600', 'text-brand-600');
+                        b.classList.add('border-transparent', 'text-slate-500');
+                    });
+                    btn.classList.add('border-brand-600', 'text-brand-600');
+                    btn.classList.remove('border-transparent', 'text-slate-500');
+
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.getElementById(tabId).classList.remove('hidden');
+                    
+                    activeTab = tabId;
+
+                    if (activeTab === 'tab-skills') {
+                        renderSkillsTab();
+                    } else if (activeTab === 'tab-comparative') {
+                        renderComparativeChart();
+                    } else if (activeTab === 'tab-text') {
+                        updateTextResponses();
+                    }
+                });
+            });
+        }
+
+        function updateDashboard() {
+            document.getElementById('total-badge').innerText = filteredData.length;
+            document.getElementById('kpi-total').innerText = filteredData.length;
+
+            if (filteredData.length === 0) return;
+
+            calculateKPIs();
+            renderDemographicCharts();
+
+            if (activeTab === 'tab-skills') {
+                renderSkillsTab();
+            } else if (activeTab === 'tab-comparative') {
+                renderComparativeChart();
+            } else if (activeTab === 'tab-text') {
+                updateTextResponses();
+            }
+        }
+
+        function calculateKPIs() {
+            if (filteredData.length === 0) return;
+
+            if (columnsConfig.metadata.location) {
+                const counts = countOccurrences(filteredData, columnsConfig.metadata.location);
+                const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+                if (sorted[0]) {
+                    document.getElementById('kpi-major-environment').innerText = sorted[0][0];
+                    const pct = ((sorted[0][1] / filteredData.length) * 100).toFixed(0);
+                    document.getElementById('kpi-major-environment-pct').innerText = `${pct}% din cadrele active`;
+                }
+            }
+
+            if (columnsConfig.metadata.level) {
+                const counts = countOccurrences(filteredData, columnsConfig.metadata.level);
+                const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+                if (sorted[0]) {
+                    document.getElementById('kpi-major-level').innerText = truncateString(sorted[0][0], 25);
+                    document.getElementById('kpi-major-level').title = sorted[0][0];
+                    const pct = ((sorted[0][1] / filteredData.length) * 100).toFixed(0);
+                    document.getElementById('kpi-major-level-pct').innerText = `${pct}% din cadrele active`;
+                }
+            }
+
+            if (columnsConfig.metadata.experience) {
+                const counts = countOccurrences(filteredData, columnsConfig.metadata.experience);
+                const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+                if (sorted[0]) {
+                    document.getElementById('kpi-major-experience').innerText = sorted[0][0];
+                    const pct = ((sorted[0][1] / filteredData.length) * 100).toFixed(0);
+                    document.getElementById('kpi-major-experience-pct').innerText = `${pct}% din cadrele active`;
+                }
+            }
+        }
+
+        function renderDemographicCharts() {
+            destroyChart('gender');
+            destroyChart('environment');
+            destroyChart('experience');
+            destroyChart('level');
+            destroyChart('subject'); 
+
+            if (columnsConfig.metadata.gender) {
+                const genData = countOccurrences(filteredData, columnsConfig.metadata.gender);
+                const ctx = document.getElementById('chart-gender').getContext('2d');
+                chartsInstance['gender'] = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(genData),
+                        datasets: [{
+                            data: Object.values(genData),
+                            backgroundColor: ['#c084fc', '#6366f1', '#cbd5e1'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                            title: { display: true, text: 'Distribuție Gen', font: { size: 12, weight: 'bold' } }
+                        }
+                    }
+                });
+            }
+
+            if (columnsConfig.metadata.location) {
+                const locData = countOccurrences(filteredData, columnsConfig.metadata.location);
+                const ctx = document.getElementById('chart-environment').getContext('2d');
+                chartsInstance['environment'] = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(locData),
+                        datasets: [{
+                            data: Object.values(locData),
+                            backgroundColor: ['#10b981', '#3b82f6', '#cbd5e1'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                            title: { display: true, text: 'Distribuție Mediu', font: { size: 12, weight: 'bold' } }
+                        }
+                    }
+                });
+            }
+
+            if (columnsConfig.metadata.experience) {
+                const expData = countOccurrences(filteredData, columnsConfig.metadata.experience);
+                const categories = Object.keys(expData).sort();
+                const values = categories.map(cat => expData[cat]);
+
+                const ctx = document.getElementById('chart-experience').getContext('2d');
+                chartsInstance['experience'] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            label: 'Profesori',
+                            data: values,
+                            backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                            borderColor: '#d97706',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                            x: { ticks: { font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+
+            if (columnsConfig.metadata.level) {
+                const lvlData = countOccurrences(filteredData, columnsConfig.metadata.level);
+                const labels = Object.keys(lvlData);
+                const values = Object.values(lvlData);
+
+                const ctx = document.getElementById('chart-level').getContext('2d');
+                chartsInstance['level'] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Număr Profesori',
+                            data: values,
+                            backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                            borderColor: '#4f46e5',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                            y: { ticks: { font: { size: 11 } } }
+                        }
+                    }
+                });
+            }
+
+            if (columnsConfig.metadata.subject) {
+                const subjData = countOccurrences(filteredData, columnsConfig.metadata.subject);
+                
+                const sortedSubj = Object.entries(subjData)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10);
+                    
+                const labels = sortedSubj.map(item => truncateString(item[0], 25));
+                const values = sortedSubj.map(item => item[1]);
+
+                const ctx = document.getElementById('chart-subject').getContext('2d');
+                chartsInstance['subject'] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Număr Profesori',
+                            data: values,
+                            backgroundColor: 'rgba(139, 92, 246, 0.85)', 
+                            borderColor: '#7c3aed',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        return sortedSubj[context[0].dataIndex][0];
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                            y: { ticks: { font: { size: 11 } } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function renderSkillsTab() {
+            if (columnsConfig.scales.length === 0) return;
+
+            let grandSum = 0;
+            let grandCount = 0;
+            
+            const skillsStats = columnsConfig.scales.map(col => {
+                let sum = 0;
+                let count = 0;
+                let positiveCount = 0; 
+                const freq = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0};
+
+                filteredData.forEach(row => {
+                    const rawVal = row[col];
+                    if (rawVal !== undefined && rawVal !== null && rawVal.toString().trim() !== '') {
+                        const score = parseInt(rawVal.toString().trim().charAt(0), 10);
+                        if (!isNaN(score) && score >= 1 && score <= 7) {
+                            sum += score;
+                            count++;
+                            freq[score]++;
+                            if (score >= 5) positiveCount++;
+
+                            grandSum += score;
+                            grandCount++;
+                        }
+                    }
+                });
+
+                const mean = count > 0 ? (sum / count) : 0;
+                const positivePct = count > 0 ? ((positiveCount / count) * 100).toFixed(0) : 0;
+
+                return {
+                    column: col,
+                    shortLabel: truncateString(col, 100),
+                    mean: mean,
+                    agreementPct: positivePct,
+                    frequencies: freq,
+                    totalValid: count
+                };
+            });
+
+            skillsStats.sort((a,b) => b.mean - a.mean);
+
+            const globalMean = grandCount > 0 ? (grandSum / grandCount) : 0;
+            const globalMeanBadge = document.getElementById('global-average');
+            globalMeanBadge.innerText = globalMean.toFixed(2);
+            
+            const badgeLabel = globalMeanBadge.nextElementSibling;
+            if (globalMean >= 5.5) {
+                badgeLabel.innerText = "Nivel Ridicat de Pregătire";
+                badgeLabel.className = "text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full font-semibold mt-1 inline-block";
+            } else if (globalMean >= 4.0) {
+                badgeLabel.innerText = "Nivel Moderat de Pregătire";
+                badgeLabel.className = "text-[10px] bg-amber-500 text-slate-900 px-2 py-0.5 rounded-full font-semibold mt-1 inline-block";
+            } else {
+                badgeLabel.innerText = "Pregătire Precară (Nevoie de Cursuri)";
+                badgeLabel.className = "text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full font-semibold mt-1 inline-block";
+            }
+
+            const container = document.getElementById('skills-list');
+            container.innerHTML = '';
+
+            skillsStats.forEach((skill, idx) => {
+                const card = document.createElement('div');
+                card.className = "group bg-slate-50 hover:bg-brand-50/40 p-3.5 rounded-xl border border-slate-200/60 cursor-pointer flex items-center justify-between gap-4 transition-all hover:scale-[1.01]";
+                
+                let progressColor = "bg-brand-500";
+                let textBadgeColor = "text-brand-700 bg-brand-50";
+                if (skill.mean >= 5.5) {
+                    progressColor = "bg-emerald-500";
+                    textBadgeColor = "text-emerald-700 bg-emerald-50";
+                } else if (skill.mean < 4.0) {
+                    progressColor = "bg-rose-500";
+                    textBadgeColor = "text-rose-700 bg-rose-50";
+                }
+
+                card.innerHTML = `
+                    <div class="grow flex items-start gap-3 min-w-0">
+                        <span class="font-extrabold text-slate-300 text-base shrink-0 group-hover:text-brand-400 transition-colors">#${idx+1}</span>
+                        <div class="min-w-0 grow">
+                            <p class="text-xs font-bold text-slate-700 leading-snug truncate" title="${skill.column}">${skill.column}</p>
+                            <div class="w-full bg-slate-200 h-1.5 rounded-full mt-2 overflow-hidden">
+                                <div class="${progressColor} h-full rounded-full transition-all duration-500" style="width: ${((skill.mean / 7)*100)}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <div class="text-right">
+                            <span class="text-xs font-black text-slate-800 block">${skill.mean.toFixed(2)}</span>
+                            <span class="text-[9px] text-slate-400 font-medium block">Medie Likert</span>
+                        </div>
+                        <span class="text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg ${textBadgeColor}">
+                            ${skill.agreementPct}% acord
+                        </span>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    openDetailedSkillView(skill);
+                });
+
+                container.appendChild(card);
+            });
+
+            if (skillsStats.length > 0) {
+                openDetailedSkillView(skillsStats[0]);
+            }
+        }
+
+        function openDetailedSkillView(skill) {
+            document.getElementById('detail-empty').classList.add('hidden');
+            document.getElementById('detail-active').classList.remove('hidden');
+
+            document.getElementById('detail-question-text').innerText = skill.column;
+            document.getElementById('detail-stat-mean').innerText = skill.mean.toFixed(2);
+            document.getElementById('detail-stat-agreement').innerText = `${skill.agreementPct}%`;
+
+            const medianResult = calculateMedianFromFrequency(skill.frequencies, skill.totalValid);
+            document.getElementById('detail-stat-median').innerText = medianResult;
+
+            const stdResult = calculateStdDevFromFrequency(skill.frequencies, skill.mean, skill.totalValid);
+            document.getElementById('detail-stat-std').innerText = stdResult.toFixed(2);
+
+            destroyChart('detailDistribution');
+            
+            const ctx = document.getElementById('chart-detail-distribution').getContext('2d');
+            chartsInstance['detailDistribution'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        '1.Dezacord total', 
+                        '2.Dezacord', 
+                        '3.Dezacord parțial', 
+                        '4.Neutru', 
+                        '5.Acord parțial', 
+                        '6.Acord', 
+                        '7.Acord total'
+                    ],
+                    datasets: [{
+                        label: 'Număr răspunsuri',
+                        data: [
+                            skill.frequencies[1],
+                            skill.frequencies[2],
+                            skill.frequencies[3],
+                            skill.frequencies[4],
+                            skill.frequencies[5],
+                            skill.frequencies[6],
+                            skill.frequencies[7]
+                        ],
+                        backgroundColor: [
+                            'rgba(244, 63, 94, 0.8)', 
+                            'rgba(251, 113, 133, 0.8)', 
+                            'rgba(253, 164, 175, 0.8)', 
+                            'rgba(203, 213, 225, 0.8)', 
+                            'rgba(147, 197, 253, 0.8)', 
+                            'rgba(59, 130, 246, 0.8)', 
+                            'rgba(16, 185, 129, 0.8)'  
+                        ],
+                        borderRadius: 6,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Distribuția exactă a opiniilor', font: { size: 11, weight: 'bold' } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 45 } }
+                    }
+                }
+            });
+        }
+
+        function renderComparativeChart() {
+            if (columnsConfig.scales.length === 0) return;
+
+            const criterium = document.getElementById('compare-criterium').value;
+            let groupColumn = null;
+
+            if (criterium === 'location') groupColumn = columnsConfig.metadata.location;
+            if (criterium === 'gender') groupColumn = columnsConfig.metadata.gender;
+            if (criterium === 'experience') groupColumn = columnsConfig.metadata.experience;
+
+            if (!groupColumn) return;
+
+            const groupsSet = new Set();
+            filteredData.forEach(row => {
+                const val = row[groupColumn];
+                if (val && val.trim() !== '' && val !== '-') {
+                    groupsSet.add(val.trim());
+                }
+            });
+            const groups = Array.from(groupsSet).sort();
+
+            if (groups.length === 0) return;
+
+            const scaleLabels = columnsConfig.scales.map(col => truncateString(col, 35));
+            
+            const datasets = groups.map((grp, groupIdx) => {
+                const colors = [
+                    'rgba(99, 102, 241, 0.85)', 
+                    'rgba(16, 185, 129, 0.85)', 
+                    'rgba(245, 158, 11, 0.85)', 
+                    'rgba(236, 72, 153, 0.85)', 
+                    'rgba(139, 92, 246, 0.85)'  
+                ];
+                const borderColors = [
+                    '#4f46e5', '#059669', '#d97706', '#db2777', '#7c3aed'
+                ];
+
+                const groupMeans = columnsConfig.scales.map(col => {
+                    let sum = 0;
+                    let count = 0;
+                    filteredData.forEach(row => {
+                        if (row[groupColumn] === grp) {
+                            const rawVal = row[col];
+                            if (rawVal !== undefined && rawVal !== null) {
+                                const score = parseInt(rawVal.toString().trim().charAt(0), 10);
+                                if (!isNaN(score) && score >= 1 && score <= 7) {
+                                    sum += score;
+                                    count++;
+                                }
+                            }
+                        }
+                    });
+                    return count > 0 ? parseFloat((sum / count).toFixed(2)) : 0;
+                });
+
+                return {
+                    label: grp,
+                    data: groupMeans,
+                    backgroundColor: colors[groupIdx % colors.length],
+                    borderColor: borderColors[groupIdx % borderColors.length],
+                    borderWidth: 1.5,
+                    borderRadius: 4
+                };
+            });
+
+            destroyChart('comparison');
+
+            const ctx = document.getElementById('chart-comparison-bar').getContext('2d');
+            chartsInstance['comparison'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: scaleLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 7,
+                            ticks: { font: { size: 10 } },
+                            title: { display: true, text: 'Medie Autoevaluare (Scara 1-7)', font: { size: 11, weight: 'bold' } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 45 },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const index = context[0].dataIndex;
+                                    return columnsConfig.scales[index];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTextResponses() {
+            if (columnsConfig.texts.length === 0) {
+                document.getElementById('text-responses-container').innerHTML = `
+                    <div class="col-span-full text-center py-10 text-slate-400">
+                        Nicio întrebare cu text liber nu a fost identificată în chestionar.
+                    </div>
+                `;
+                return;
+            }
+
+            const colSelected = document.getElementById('text-column-select').value;
+            const searchVal = document.getElementById('text-search-input').value.toLowerCase().trim();
+
+            const container = document.getElementById('text-responses-container');
+            container.innerHTML = '';
+
+            let shownCount = 0;
+
+            filteredData.forEach(row => {
+                const feedbackText = row[colSelected];
+                if (feedbackText && feedbackText.trim() !== '' && feedbackText !== '-' && feedbackText !== 'nu') {
+                    
+                    if (searchVal !== '' && !feedbackText.toLowerCase().includes(searchVal)) {
+                        return; 
+                    }
+
+                    shownCount++;
+
+                    const card = document.createElement('div');
+                    card.className = "bg-slate-50 border border-slate-200/50 p-4 rounded-xl flex flex-col gap-2 shadow-sm hover:border-indigo-100 hover:bg-indigo-50/5 transition-all";
+                    
+                    let profileStr = "Anonim";
+                    const metaParts = [];
+                    if (columnsConfig.metadata.gender && row[columnsConfig.metadata.gender]) metaParts.push(row[columnsConfig.metadata.gender]);
+                    if (columnsConfig.metadata.location && row[columnsConfig.metadata.location]) metaParts.push(row[columnsConfig.metadata.location]);
+                    if (columnsConfig.metadata.experience && row[columnsConfig.metadata.experience]) metaParts.push(row[columnsConfig.metadata.experience]);
+                    if (metaParts.length > 0) profileStr = metaParts.join(', ');
+
+                    let highlightedText = feedbackText;
+                    if (searchVal !== '') {
+                        const regex = new RegExp(`(${searchVal})`, 'gi');
+                        highlightedText = feedbackText.replace(regex, `<mark class="bg-amber-100 text-slate-900 font-semibold">$1</mark>`);
+                    }
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center border-b border-slate-200/40 pb-2 mb-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                <svg class="w-3 h-3 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                ${profileStr}
+                            </span>
+                            <span class="text-[9px] bg-indigo-100/50 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">
+                                Profesor
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed italic whitespace-pre-line">
+                            "${highlightedText}"
+                        </p>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+
+            document.getElementById('text-count-badge').innerText = `${shownCount} răspunsuri găsite`;
+
+            if (shownCount === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-slate-400">
+                        <svg class="w-10 h-10 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Niciun rezultat nu s-a potrivit termenului căutat în răspunsurile înregistrate.
+                    </div>
+                `;
+            }
+        }
+
+        function countOccurrences(arr, colName) {
+            const counts = {};
+            arr.forEach(row => {
+                const val = row[colName];
+                if (val && val.trim() !== '' && val !== '-') {
+                    const normVal = val.trim();
+                    counts[normVal] = (counts[normVal] || 0) + 1;
+                }
+            });
+            return counts;
+        }
+
+        function destroyChart(name) {
+            if (chartsInstance[name]) {
+                chartsInstance[name].destroy();
+                delete chartsInstance[name];
+            }
+        }
+
+        function calculateMedianFromFrequency(freq, total) {
+            if (total === 0) return 0;
+            const mid = Math.ceil(total / 2);
+            let cumulative = 0;
+            for (let i = 1; i <= 7; i++) {
+                cumulative += freq[i];
+                if (cumulative >= mid) {
+                    return i;
+                }
+            }
+            return 4; 
+        }
+
+        function calculateStdDevFromFrequency(freq, mean, total) {
+            if (total <= 1) return 0;
+            let varianceSum = 0;
+            for (let i = 1; i <= 7; i++) {
+                varianceSum += freq[i] * Math.pow((i - mean), 2);
+            }
+            return Math.sqrt(varianceSum / (total - 1));
+        }
+
+        function truncateString(str, num) {
+            if (!str) return '';
+            if (str.length <= num) {
+                return str;
+            }
+            return str.slice(0, num) + '...';
+        }
+    </script>
+</body>
+</html>
